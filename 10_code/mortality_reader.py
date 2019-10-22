@@ -9,15 +9,15 @@ import numpy as np
 import os
 
 # path of the directory that includes mortality data files.
-dirPath = './00_source/'
+dirPath = '../00_source/'
 # format of the mortality data file
 fileNameFormat = "Underlying Cause of Death, %d.txt"
 
 # output file path
-outputPath = dirPath + "pairB_intermidiate.csv"
+outputPath = "../20_intermediate_files/pairB_intermidiate.csv"
 
 # extracting condition for state.
-cond_states = ['FL', 'TX', 'WA']
+# cond_states = ['FL', 'TX', 'WA']
 # extracting condition for the cause of death
 # extract rows that includes the cause like cond_cause.
 cond_cause = "Drug poisonings"
@@ -43,7 +43,8 @@ for i in range(2004, 2015 + 1):
 
     # Extract necessary rows using conditions
     tmp_extracted = tmp[(tmp['Drug/Alcohol Induced Cause'].str.contains(cond_cause))\
-                       & (tmp.State.isin(cond_states))]
+                        #& (tmp.State.isin(cond_states))\
+    ]
     
     # Assign or append the extracted rows to result.
     if(result is None):
