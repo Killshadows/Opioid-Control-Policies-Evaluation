@@ -13,7 +13,7 @@ df_shipments = df[['TRANSACTION_DATE', 'BUYER_STATE', 'BUYER_COUNTY', 'QUANTITY'
 df_shipments.to_csv('/Users/ZifanPeng/Desktop/IDS-data/IDS-shipment-data-00.csv')
 
 # read data: IDS-shipment-data-00.csv
-df_shipments = pd.read_csv('/Users/ZifanPeng/Desktop/IDS-shipment-data.tsv')
+df_shipments = pd.read_csv('/Users/ZifanPeng/Desktop/IDS-data/IDS-shipment-data-00.csv')
 df_shipments.head(10)
 # drop col0
 df_shipments = df_shipments.drop(['Unnamed: 0'], axis = 1)
@@ -35,9 +35,9 @@ df_shipments = df_shipments.drop(['UNIT'], axis = 1)
 df_shipments.head()
 df_shipments[df_shipments.BUYER_COUNTY.isnull().values==True]
 
-# google 23635 and find that the county name is 'Indian Rocks Beach'
-# replace NaN with 'Indian Rocks Beach'
-df_shipments = df_shipments.replace(np.nan, 'Indian Rocks Beach')
+# google 23635 and find that the county name is 'Pinellas'
+# replace NaN with 'Pinellas'
+df_shipments = df_shipments.replace(np.nan, 'PINELLAS')
 df_shipments.head()
 
 
@@ -68,4 +68,3 @@ Save
 '''
 # Save the data
 df_shipments.to_csv('/Users/ZifanPeng/Desktop/IDS-data/IDS-shipment-data-1023.csv')
-
