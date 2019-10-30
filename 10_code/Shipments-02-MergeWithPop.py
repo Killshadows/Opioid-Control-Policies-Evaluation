@@ -6,10 +6,8 @@ Import data
 '''
 # Import shipment data
 df_shipments = pd.read_csv('/Users/ZifanPeng/Desktop/IDS-data/IDS-shipment-data-02-cleaned.csv')
-df_shipments.head()
 # Import population data
 pop_FL = pd.read_csv('/Users/ZifanPeng/Desktop/IDS-data/FL-Population-CountyLevel.csv')
-pop_FL.head()
 
 
 '''
