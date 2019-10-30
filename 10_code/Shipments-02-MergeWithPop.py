@@ -6,8 +6,10 @@ Import data
 '''
 # Import shipment data
 df_shipments = pd.read_csv('/Users/ZifanPeng/Desktop/IDS-data/IDS-shipment-data-02-cleaned.csv')
+df_shipments.head()
 # Import population data
 pop_FL = pd.read_csv('/Users/ZifanPeng/Desktop/IDS-data/FL-Population-CountyLevel.csv')
+pop_FL.head()
 
 
 '''
@@ -30,7 +32,9 @@ print(shipment_FL_merged[shipment_FL_merged['_merge']=='right_only']['County Nam
 # In df_shipments, we have: 'SAINT LUCIE' ,'SAINT JOHNS', 'DE SOTO'
 # In pop_FL dataset, we have: 'ST. LUCIE', 'ST. JOHNS', 'DESOTO'
 # Now, fix it in pop_FL
-pop_FL = pop_FL.replace(['ST. LUCIE', 'ST. JOHNS', 'DESOTO'], ['SAINT LUCIE', 'SAINT JOHNS','DE SOTO'])
+pop_FL['County Name'] = pop_FL['County Name'].replace({'ST. LUCIE': 'SAINT LUCIE',
+                                                          'ST. JOHNS': 'SAINT JOHNS',
+                                                          'DESOTO': 'DE SOTO'})
 
 # Merge again
 shipment_FL_merged = pd.merge(df_shipments, pop_FL, left_on='BUYER_COUNTY', right_on='County Name',
