@@ -52,11 +52,16 @@ shipment_FL_merged = shipment_FL_merged.drop(['County Name', '_merge'], axis = 1
 shipment_FL_merged = shipment_FL_merged.rename(columns={'Population(2019)':'POP'})
 shipment_FL_merged.head()
 
-# Normalize the quantity
-print(shipment_FL_merged.dtypes)
-shipment_FL_merged['QUANTITY_PERCAP'] = shipment_FL_merged['QUANTITY']/shipment_FL_merged['POP']
-shipment_FL_merged.head()
+# group by STATE, COUNTY, YEAR
+shipment_FL_grouped = shipment_FL_merged.groupby(['BUYER_STATE','BUYER_COUNTY', 'YEAR']).agg({'QUANTITY': 'sum', 'POP':'max'})
+shipment_FL_grouped = shipment_FL_grouped.reset_index()
+shipment_FL_grouped.head()
 
+# Normalize the quantity
+print(shipment_FL_grouped.dtypes)
+shipment_FL_grouped['QUANTITY_PERCAP'] = shipment_FL_grouped['QUANTITY']/shipment_FL_grouped['POP']
+shipment_FL_grouped['POST'] = (shipment_FL_grouped.YEAR > 2009)*1
+shipment_FL_grouped.head()
 
 '''
 Save
