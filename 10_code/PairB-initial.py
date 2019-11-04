@@ -1,95 +1,82 @@
 ######## README ########
 
-# For the sake of easier bugs checking and fixing, This .py text file is only the first step to initiate basic datasets for mortality analysis, which only includes basic subsetting and reshaping.
-# The code below mainly initiates three basic mortality DataFrame on county, state and country level respectively.
+# For easier bugs checking and fixing
+# This .py text file only makes the first step to initiate basic datasets for mortality analysis
+# Only includes basic subsetting and reshaping
 
-# Code to form the intermediate dataset ready for use will be in another .py text file in the next step.
-# Specifically, the next step would be examining statistic summary and selecting samples. After that, we can add the Post and Policy_State binary variables to these basic datasets in order to form our intermediate dataset.
-
+# The code below mainly initiates 2 basic mortality dataframes on county and state level respectively
+# The next step would be merge with population dataset to do normalization
 
 
 import pandas as pd
 import numpy as np
 
-######## Import data from original dataset ########
-# Note the URL need modification, as Shota will upload an updated version of raw data on GitHub later
-mortality_int = pd.read_csv('https://raw.githubusercontent.com/MIDS-at-Duke/estimating-impact-of-opioid-prescription-regulations-team-2/master/00_source/pairB_intermidiate.csv?token=ALEXUKH3VPP2OC65MMLV4Z25W4QSO')
-mortality_int.head()
+# Import data from source dataset
+mortality_int = pd.read_csv('https://raw.githubusercontent.com/MIDS-at-Duke/estimating-impact-of-opioid-prescription-regulations-team-2/master/20_intermediate_files/pairB_intermidiate.csv?token=ALEXUKHAZ57FEC5LR4TH3VS5YWJHK')
+mortality_int
 
 
 ######## Learn more about the Initial Dateset ########
 
 # We want to check if there are counties that have same names.
-# The number of 'County Code' is greater than the number of 'County'.
-# So we should use both 'State' AND 'County' to ensure a unique County.
-County_number = len(mortality_int['County'].value_counts())
-CountyCode_number = len(mortality_int['County Code'].value_counts())
-County_number < CountyCode_number
+# We found that the number of county code is greater than the number of county names
+# So we should use 'State' AND 'County' together as an identifier
+CountyName_number = len(mortality_int['County'].unique())
+CountyCode_number = len(mortality_int['County Code'].unique())
+print('Number of county names =', CountyName_number)
+print('Number of county codes =', CountyCode_number)
 
 # Note that there are 3 specific reasons for drug overdose
 # But we don't want to analyze into that much details
 # We just want sum them up and configure them all as general drug overdose
-# By that we simply drop 'Drug/Alcohol Induced Cause' and 'Drug/Alcohol Induced Cause Code'
+# By that we simply drop 'Drug/Alcohol Induced Cause' and 'Drug/Alcohol Induced Cause Code' coloumn
 mortality_int['Drug/Alcohol Induced Cause'].value_counts()
 
-# To form our intermdiate dataset, we only need 4 variables in mortality_int
+# Therefore, to form our intermdiate dataset, we only need 4 variables in mortality_int
 # They are 'Year','State','County' and 'Deaths'
-mortality_county = mortality_int[['Year','State','County','Deaths']]
-mortality_county
+mortality_all = mortality_int[['Year','State','County','Deaths']]
+mortality_all
+
+# Check the current type of 'Deaths',
+# Look at all the values of age to figure out if there is missing data or categorial data
+for i in mortality_all.Deaths.value_counts().index: print(i)
+
+# replace Missing entries with '0'
+mortality_all[mortality_all['Deaths'] == 'Missing'] = '0'
+
+# convert 'Deaths' from a categorical to numeric (float)
+mortality_all['Deaths'] = mortality_all['Deaths'].astype('float')
+
+# convert Missing data from '0' to 'NA'
+mortality_all[mortality_all['Deaths'] == 0.0] = np.nan
+
+# Take a look after data cleaning
+mortality_all
 
 
 ######## County Level Mortality Dataset ########
 
-# Sum up deaths caused by all types of drug overdose at county level, using groupby in pandas
-# Also set dictionary to define a unique county in a specific year
-dic_county_unique = ['Year','State','County']
-mortality_by_county = mortality_county.groupby(dic_county_unique).sum().reset_index()
-mortality_by_county
-
-# List all counties in each state and count
-county_list = mortality_by_county[['State','County']].groupby(['State','County']).count().reset_index()
-print(county_list)
-county_list['State'].value_counts()
+# Sum up deaths caused by all types of drug overdose at county level
+mortality_county = mortality_all.groupby(['Year','State','County']).sum().reset_index()
+mortality_county
 
 # Check if our groupby is correct
 # i.e. Check duplications based on multiple columns on 'Year', 'State' AND 'County'
-assert not mortality_by_county.duplicated(['Year','State','County']).any()
+assert not mortality_county.duplicated(['Year','State','County']).any()
 
 
 ######## State Level Mortality Dataset ########
-
-mortality_state = mortality_int[['Year','State','Deaths']]
-
-# Sum up deaths caused by all types of drug overdose at state level, using groupby in pandas
-# Also set dictionary to define a unique state in a specific year
-dic_state_unique = ['Year','State']
-mortality_by_state = pd.DataFrame(mortality_state.groupby(dic_state_unique).sum().reset_index())
-mortality_by_state
-
-# List all states
-mortality_by_state['State'].value_counts()
+# Sum up deaths caused by all types of drug overdose at state level
+mortality_state = mortality_all.groupby(['Year','State']).sum().reset_index()
+mortality_state
 
 # Check if our groupby is correct
 # i.e. Check duplications based on multiple columns on 'Year' AND 'State'
-assert not mortality_by_state.duplicated(['Year','State']).any()
+assert not mortality_state.duplicated(['Year','State']).any()
 
 
-######## Country Level Mortality Dataset ########
-
-mortality_USA = mortality_int[['Year','Deaths']]
-
-# Sum up deaths caused by all types of drug overdose at Country(USA) level, using groupby in pandas
-# Also set dictionary to define wholespecific year
-mortality_all_USA = mortality_USA[['Year','Deaths']].groupby('Year').sum().reset_index()
-mortality_all_USA
-
-
-######## DataFrame Index ########
-# County Level Mortality Dataset >>>
-# mortality_by_county
-
-# State Level Mortality Dataset >>>
-# mortality_by_state
-
-# Country Level Mortality Dataset >>>
-# mortality_all_USA
+######## Country Level Mortality Dataset (only for reference) ########
+# Sum up deaths caused by all types of drug overdose at Country(USA) level
+# aka time trends in whole USA
+mortality_USA = mortality_all.groupby('Year').sum().reset_index()
+mortality_USA
