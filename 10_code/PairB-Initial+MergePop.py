@@ -164,3 +164,13 @@ merge_mortality = merge_mortality[merge_mortality['State_Code']!='AK'].reset_ind
 # Check if there is NaN in population for DC, FL and TX
 # We got our merged dataset ready for the next step
 assert not merge_mortality[(merge_mortality['State_Code']=='DC')|(merge_mortality['State_Code']=='FL')|(merge_mortality['State_Code']=='TX')]['Population_2010'].isnull().any()
+
+# Normalization by 2010 Population
+merge_mortality['Deaths_NormPop2010'] = merge_mortality['Deaths']/ merge_mortality['Population_2010']
+merge_mortality.head()
+
+# Extract necessary columns for next step
+# Rename the columns the same as required in action plan
+mortality_pop_norm = merge_mortality[['Year','State_Code','County','Deaths','Population_2010','Deaths_PerCap_County']]
+mortality_pop_norm.columns = ['Year','State','County','Deaths','Population','Deaths_PerCap_County']
+mortality_pop_norm
