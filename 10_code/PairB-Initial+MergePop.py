@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 
 # Import data from source dataset
-mortality_int = pd.read_csv('https://raw.githubusercontent.com/MIDS-at-Duke/estimating-impact-of-opioid-prescription-regulations-team-2/master/20_intermediate_files/pairB_intermidiate.csv?token=ALEXUKHAZ57FEC5LR4TH3VS5YWJHK')
+mortality_int = pd.read_csv('~/estimating-impact-of-opioid-prescription-regulations-team-2/20_intermediate_files/pairB_intermidiate.csv')
 mortality_int
 
 
