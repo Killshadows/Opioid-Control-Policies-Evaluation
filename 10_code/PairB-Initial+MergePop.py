@@ -171,6 +171,6 @@ merge_mortality.head()
 
 # Extract necessary columns for next step
 # Rename the columns the same as required in action plan
-mortality_pop_norm = merge_mortality[['Year','State_Code','County','Deaths','Population_2010','Deaths_PerCap_County']]
+mortality_pop_norm = merge_mortality[['Year','State_Code','County','Deaths','Population_2010','Deaths_NormPop2010']]
 mortality_pop_norm.columns = ['Year','State','County','Deaths','Population','Deaths_PerCap_County']
 mortality_pop_norm
