@@ -8,7 +8,9 @@
 # Need review before moving forwards
 
 """
-Plotting Pre-Post Graphs for FL
+Pre-Post analysis - FL
+
+Plotting Pre-Post Graphs
 """
 
 from plotnine import *
@@ -19,10 +21,10 @@ mortality_pop_norm['Deaths_PerCap_County'] = mortality_pop_norm['Deaths_PerCap_C
 # Plot pre-post graphs for FL
 mortality_FL = mortality_pop_norm[mortality_pop_norm['State']=='FL']
 (ggplot(mortality_FL, aes(x='Year', y='Deaths_PerCap_County')) +
-        geom_point(alpha = 0.5) + 
+        geom_point(alpha = 0.5) +
         # add pre-trend line and make it red
         geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] <= 2010], color = 'red') +
-        # add post-trend line 
+        # add post-trend line
         geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] > 2010], color = 'black') +
         # change labels
         labs(title = "Time Trends of Drug Deaths Rate 2004-2015",
@@ -32,7 +34,28 @@ mortality_FL = mortality_pop_norm[mortality_pop_norm['State']=='FL']
 
 
 """
+Pre-Post analysis - TX
+
+Plotting Pre-Post Graphs
+"""
+
+
+
+"""
+Pre-Post analysis - DC
+
+Plotting Pre-Post Graphs
+"""
+
+
+
+
+
+"""
+Choosing Sample for FL
+
 Plotting Pre-Post Graphs for All States
+Policy Change in 2010
 """
 
 # Select Sample for FL, where the time change will be 2011
@@ -41,7 +64,7 @@ Plotting Pre-Post Graphs for All States
 (ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
         # add pre-trend line and make it red
         geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] <= 2010], color = 'red') +
-        # add post-trend line 
+        # add post-trend line
         geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] > 2010], color = 'black') +
         # change labels
         labs(title = "Drug Deaths Rate 2004-2015, Policy Change in 2011",
@@ -56,7 +79,7 @@ Plotting Pre-Post Graphs for All States
 
 
 """
-Regressions of Pre-Trends before 2011 
+Regressions of Pre-Trends before Policy Change
 """
 
 # Get slopes of pre-trend of all states
@@ -95,3 +118,7 @@ FL_sample_abs =np.absolute(FL_sample)
 # ex: the location, population magnitude, policy change, etc.
 FL_sample_abs.sort_values(by=['Slope','Level'])
 
+
+"""
+D-in-D Analysis - FL
+"""
