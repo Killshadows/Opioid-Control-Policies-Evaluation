@@ -5,22 +5,22 @@
 # We choose the neighbor state of FL: Alabama and Georgia
 
 
-
+# Import
 import pandas as pd
 import numpy as np
 from plotnine import *
 
 
-
-#### Some functions here #####
+#### Some functions here ###
 '''
 Read data
 '''
 def readData(path):
     df = pd.read_csv(path,
-                     sep='\t', 
+                     sep='\t',
                      usecols=['TRANSACTION_DATE', 'BUYER_STATE', 'BUYER_COUNTY', 'QUANTITY', 'BUYER_ZIP'])
     return df
+
 
 '''
 Transfer TRANSACTION_DATE to year & month
@@ -38,6 +38,7 @@ def transferDate(df_shipments):
     df_shipments['TRANSACTION_TIME'] = pd.PeriodIndex(year=df_shipments["YEAR"], month=df_shipments["MONTH"], freq="m")
     return df_shipments
 
+
 '''
 group by 'BUYER_STATE','BUYER_COUNTY', 'YEAR'
 '''
@@ -47,32 +48,34 @@ def groupBy(shipment_merged):
     shipment_grouped.head()
     return shipment_grouped
 
+
 '''
 Normalization for Quantity
 '''
 # Normalize the quantity
 def normalize(shipment_grouped):
-    shipment_grouped['QUANTITY_PERCAP'] = shipment_grouped['QUANTITY']/shipment_FL_grouped['POP']
+    shipment_grouped['QUANTITY_PERCAP'] = shipment_grouped['QUANTITY']/shipment_grouped['POP']
     shipment_grouped['POST'] = (shipment_grouped.YEAR > 2009)*1
     return shipment_grouped
+
 
 '''
 Plot pre-post
 '''
-def plot(shipment_grouped, state_name):  
-    prePost = (ggplot(shipment_grouped,aes(x = 'YEAR', y = 'QUANTITY_PERCAP', group = 'POST')) 
+def plot(shipment_grouped, state_name):
+    prePost = (ggplot(shipment_grouped,aes(x = 'YEAR', y = 'QUANTITY_PERCAP', group = 'POST'))
                + geom_point(alpha = 0.5)
                + geom_smooth(method='lm', fill=None, colour="red")
                +theme_classic(base_family = "Helvetica")
-               +labs(title= f"opioid shipments Pre-Post analysis for {state_name}",
+               +labs(title= f"Opioid shipments Pre-Post analysis for {state_name}",
                      x="Year",
                      y="Quantity Per Cap"))
     # Save
     prePost.save(f'/Users/ZifanPeng/Desktop/estimating-impact-of-opioid-prescription-regulations-team-2/30_results/{state_name}-PrePost.png')
-    
-    
-    
-    
+
+
+
+
 ###### Import poplulation data #######
 # Import poplulation dataset for all states and counties
 pop = pd.read_excel('/Users/ZifanPeng/Desktop/IDS-data/Population2010_AllCounties.xls')
@@ -101,7 +104,7 @@ shipments_AL = transferDate(shipments_AL)
 # Subset population for AL
 pop_AL = pop[pop.State == 'Alabama'].reset_index().drop('index', axis = 1)
 # Fix the county name
-pop_AL['County'] = pop_AL['County'].replace({'DEKALB': 'DE KALB', 
+pop_AL['County'] = pop_AL['County'].replace({'DEKALB': 'DE KALB',
                                                           'ST. CLAIR': 'SAINT CLAIR'})
 # Merge
 shipment_AL_merged = pd.merge(shipments_AL, pop_AL, left_on='BUYER_COUNTY', right_on='County',
@@ -160,4 +163,3 @@ shipment_GA_grouped.head()
 
 # Plot
 plot(shipment_GA_grouped, 'AL')
-
