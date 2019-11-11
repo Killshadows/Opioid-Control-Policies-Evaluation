@@ -35,13 +35,13 @@ def readData(path):
 Transfer TRANSACTION_DATE to year & month
 '''
 def transferDate(df_shipments):
-    # Convert RTANSACTION_DATE to string in order to subset it
+# Convert RTANSACTION_DATE to string in order to subset it
     df_shipments['TRANSACTION_DATE'] = df_shipments['TRANSACTION_DATE'].astype(str)
-    # Subset the TRANSACTION_DATE, and get YEAR and Month
+# Subset the TRANSACTION_DATE, and get YEAR and Month
     df_shipments['YEAR'] = df_shipments['TRANSACTION_DATE'].apply(lambda x: x[-4:])
     df_shipments['MONTH'] = df_shipments['TRANSACTION_DATE'].apply(lambda x: x[-8:-6])
-    # Convert to int, in order to use PeriodIndex
-    # Create a new col as YYYY-MM
+# Convert to int, in order to use PeriodIndex
+# Create a new col as YYYY-MM
     df_shipments['YEAR'] = df_shipments['YEAR'].astype(int)
     df_shipments['MONTH'] = df_shipments['MONTH'].astype(int)
     df_shipments['TRANSACTION_TIME'] = pd.PeriodIndex(year=df_shipments["YEAR"], month=df_shipments["MONTH"], freq="m")
@@ -61,7 +61,7 @@ Normalization for Quantity
 '''
 # Normalize the quantity
 def normalize(shipment_grouped):
-    shipment_grouped['QUANTITY_PERCAP'] = shipment_grouped['QUANTITY']/shipment_FL_grouped['POP']
+    shipment_grouped['QUANTITY_PERCAP'] = shipment_grouped['QUANTITY']/shipment_grouped['POP']
     shipment_grouped['POST'] = (shipment_grouped.YEAR > 2009)*1
     return shipment_grouped
 
@@ -130,7 +130,6 @@ shipment_FL_grouped = groupBy(shipment_FL_merged)
 
 # normalize
 normalize(shipment_FL_grouped)
-shipment_FL_grouped.head()
 
 # Plot
 plot(shipment_FL_grouped, 'FL')
@@ -166,7 +165,6 @@ shipment_AL_grouped = groupBy(shipment_AL_merged)
 
 # normalize
 normalize(shipment_AL_grouped)
-shipment_AL_grouped.head()
 
 # Plot
 plot(shipment_AL_grouped, 'AL')
@@ -206,22 +204,23 @@ shipment_GA_grouped = groupBy(shipment_GA_merged)
 
 # normalize
 normalize(shipment_GA_grouped)
-shipment_GA_grouped.head()
+
 
 # Plot
-plot(shipment_GA_grouped, 'AL')
-
+plot(shipment_GA_grouped, 'GA')
 
 
 
 ############## Diff-in-diff plot (FL, AL, GA) ##################
+
+# Diff-in-diff plot for three states
 prePost = (ggplot(aes(x = 'YEAR', y = 'QUANTITY_PERCAP', group = 'POST', color = 'BUYER_STATE'))
            # Florida
-           +geom_smooth(method = 'lm', data = shipment_FL_grouped)
+           +geom_smooth(method = 'lm', fill = None, data = shipment_FL_grouped)
            # Alabama
-           +geom_smooth(method = 'lm', data = shipment_AL_grouped)
+           +geom_smooth(method = 'lm', fill = None, data = shipment_AL_grouped)
            # Georgia
-           +geom_smooth(method = 'lm', data = shipment_GA_grouped)
+           +geom_smooth(method = 'lm', fill = None, data = shipment_GA_grouped)
            # Change themes
            +theme_classic(base_family = "Helvetica")
            # change labels
@@ -231,3 +230,21 @@ prePost = (ggplot(aes(x = 'YEAR', y = 'QUANTITY_PERCAP', group = 'POST', color =
                  color = "State")
           )
 prePost.save(f'/Users/ZifanPeng/Desktop/estimating-impact-of-opioid-prescription-regulations-team-2/30_results/Diff-in-diff.png')
+
+# Diff-in-diff plot for treatment(FL) and control(AL & GA)
+# Make all the counties in AL & GA a county pool
+shipment_AL_GA = pd.concat([shipment_AL_grouped, shipment_GA_grouped])
+prePost2 = (ggplot(aes(x = 'YEAR', y = 'QUANTITY_PERCAP', group = 'POST', color = 'BUYER_STATE'))
+           # Florida
+           +geom_smooth(method = 'lm', fill = None, data = shipment_FL_grouped)
+           # AL & GA
+           +geom_smooth(method = 'lm', fill = None,data = shipment_AL_GA)
+           # Change themes
+           +theme_classic(base_family = "Helvetica")
+           # change labels
+           +labs(title = "Opioid Shipments Rate, Policy Change in 2010 in FL",
+                 x = "Year",
+                 y = "Quantity Per Cap",
+                 color = "State")
+          )
+prePost2.save(f'/Users/ZifanPeng/Desktop/estimating-impact-of-opioid-prescription-regulations-team-2/30_results/Diff-in-diff2.png')
