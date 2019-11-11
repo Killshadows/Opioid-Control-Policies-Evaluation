@@ -23,9 +23,9 @@ mortality_FL = mortality_pop_norm[mortality_pop_norm['State']=='FL']
 (ggplot(mortality_FL, aes(x='Year', y='Deaths_PerCap_County')) +
         geom_point(alpha = 0.5) +
         # add pre-trend line and make it red
-        geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] <= 2010], color = 'red') +
+        geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] < 2010], color = 'red') +
         # add post-trend line
-        geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] > 2010], color = 'black') +
+        geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] >= 2010], color = 'black') +
         # change labels
         labs(title = "Time Trends of Drug Deaths Rate 2004-2015",
              x = "Time",
@@ -52,73 +52,322 @@ Plotting Pre-Post Graphs
 
 
 """
-Choosing Sample for FL
-
-Plotting Pre-Post Graphs for All States
-Policy Change in 2010
+D-in-D Analysis
+Florida
 """
-
-# Select Sample for FL, where the time change will be 2011
-
-# Plot
+# Plot pre-post for all states as an overview
 (ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
         # add pre-trend line and make it red
-        geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] <= 2010], color = 'red') +
+        geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] < 2010], color = 'red') +
         # add post-trend line
-        geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] > 2010], color = 'black') +
+        geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] >= 2010], color = 'black') +
         # change labels
-        labs(title = "Drug Deaths Rate 2004-2015, Policy Change in 2011",
+        labs(title = "Drug Deaths Rate, All States 2004-2015, Policy Change in 2010",
              x = "Time",
              y = "Drug Deaths Rate") +
         facet_wrap('State')
 )
 
-# So we will not consider ND, SD, VT and WY as candidates because of incomplete data
-# It seems that the graphs only give us a sketchy output
-# we should also get estimate of the slope and level by regression
-
+"""
+Florida
+2 Neighbors as Control: AL, GA
+D-in-D Plotting
+"""
+# Subset data
+mortality_FL_neighbor = (mortality_pop_norm[
+    (mortality_pop_norm['State']=='FL')|
+    (mortality_pop_norm['State']=='AL')|
+    (mortality_pop_norm['State']=='GA')])
+# Add dummy variables for post and policy_state
+mortality_FL_neighbor['Post'] = (mortality_FL_neighbor['Year']>=2010)
+mortality_FL_neighbor['Policy_State'] = (mortality_FL_neighbor['State']=='FL')
+# Plotting
+(ggplot(mortality_FL_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+        # add pre and post trend line for FL
+        geom_smooth(method = 'lm', data = mortality_FL_neighbor[mortality_FL_neighbor['State']=='FL'],fill=None) +
+        # add pre and post trend line for neighbor
+        geom_smooth(method = 'lm', data = mortality_FL_neighbor[mortality_FL_neighbor['State']!='FL'],fill=None,linetype='dashed') +
+        # change labels
+        labs(title = "Diff-in-Diff, Drug Deaths Per Cap Trends 2004-2015",
+             x = "Time",
+             y = "Drug Deaths Per Cap",
+             color = 'Policy_State') +
+        # add vertical lines
+        geom_vline(aes(xintercept=2009)) +
+        geom_vline(aes(xintercept=2010)) +
+        # modify legends
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Florida)","False (2 Neigbors: AL, GA)"]) +
+        theme(legend_position=(.5, -.05)) +
+        # modify breaks of x axis
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+)
 
 """
-Regressions of Pre-Trends before Policy Change
+Florida
+2 Neighbors as Control: AL, GA
+D-in-D Regression
 """
-
-# Get slopes of pre-trend of all states
+# Adjust for year
+mortality_FL_neighbor['Year_Adjust'] = mortality_FL_neighbor['Year'] - 2010
+# Regression
 import statsmodels as sm
 import statsmodels.formula.api as smf
+result1_FL = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_smallsample).fit()
+result1_FL.summary()
 
-# define function for Group-Wise Linear Regression
-def regress(data, yvars, xvars):
-    Y = data[yvars]
-    X = data[xvars]
-    result = smf.ols('Y ~ X', data = data).fit()
-    return result.params
+"""
+Florida
+All other states as Control
+D-in-D Plotting
+"""
+# Subset data (drop Alaska)
+mortality_FL_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
+# Add dummy variables for post and policy_state
+mortality_FL_all['Post'] = (mortality_FL_all['Year']>=2010)
+mortality_FL_all['Policy_State'] = (mortality_FL_all['State']=='FL')
+# Plotting
+(ggplot(mortality_FL_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+        # add pre and post trend line for FL
+        geom_smooth(method = 'lm', data = mortality_FL_all[mortality_FL_all['State']=='FL'],fill=None) +
+        # add pre and post trend line for neighbor
+        geom_smooth(method = 'lm', data = mortality_FL_all[mortality_FL_all['State']!='FL'],fill=None,linetype='dashed') +
+        # change labels
+        labs(title = "Diff-in-Diff, Drug Deaths Per Cap Trends 2004-2015",
+             x = "Time",
+             y = "Drug Deaths Per Cap",
+             color = 'Policy_State') +
+        # add vertical lines
+        geom_vline(aes(xintercept=2009)) +
+        geom_vline(aes(xintercept=2010)) +
+        # modify legends
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Florida)","False (All other US states)"]) +
+        theme(legend_position=(.5, -.05)) +
+        # modify breaks of x axis
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+)
 
-# Extract data before 2011
-mortality_FL_pre = mortality_pop_norm[mortality_pop_norm['Year']<=2010]
-mortality_FL_pre
+"""
+Florida
+All other states as Control
+D-in-D Regression
+"""
+# Adjust for year
+mortality_FL_all['Year_Adjust'] = mortality_FL_all['Year'] - 2010
+# Regression
+result2_FL = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_all).fit()
+result2_FL.summary()
 
-# Group by state
-by_state = mortality_FL_pre.groupby('State')
-by_state
-
-# Regress by state to get slopes and levels of pre-trends
-FL_sample = by_state.apply(regress, 'Deaths_PerCap_County', 'Year')
-FL_sample.columns = ['Level','Slope']
-
-# Centering to FL to get the difference of Level and Slope
-FL_sample = FL_sample - FL_sample.loc['FL'].values.squeeze()
-# Get absolute value ready for sorting
-FL_sample_abs =np.absolute(FL_sample)
-
-# Sort the value by Slope and Level
-# The one has the least difference should be our ideal sample
-# the output suggests we consider CA, OH and MI...
-
-# Should double check them on other control conditions/
-# ex: the location, population magnitude, policy change, etc.
-FL_sample_abs.sort_values(by=['Slope','Level'])
 
 
 """
-D-in-D Analysis - FL
+D-in-D Analysis
+Texas
 """
+# Plot pre-post for all states as an overview
+(ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
+        # add pre-trend line and make it red
+        geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] < 2007], color = 'red') +
+        # add post-trend line
+        geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] >= 2007], color = 'black') +
+        # change labels
+        labs(title = "Drug Deaths Per Cap, All States 2004-2015, Policy Change in 2007",
+             x = "Time",
+             y = "Drug Deaths Rate") +
+        facet_wrap('State')
+)
+
+"""
+Texas
+4 Neighbors as Control: NM, OK, AR, LA
+D-in-D Plotting
+"""
+# Subset data
+mortality_TX_neighbor = (mortality_pop_norm[
+    (mortality_pop_norm['State']=='TX')|
+    (mortality_pop_norm['State']=='NM')|
+    (mortality_pop_norm['State']=='OK')|
+    (mortality_pop_norm['State']=='AR')|
+    (mortality_pop_norm['State']=='LA')])
+# Add dummy variables for post and policy_state
+mortality_TX_neighbor['Post'] = (mortality_TX_neighbor['Year']>=2007)
+mortality_TX_neighbor['Policy_State'] = (mortality_TX_neighbor['State']=='TX')
+# Plotting
+(ggplot(mortality_TX_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+        # add pre and post trend line for FL
+        geom_smooth(method = 'lm', data = mortality_TX_neighbor[mortality_TX_neighbor['State']=='TX'],fill=None) +
+        # add pre and post trend line for neighbor
+        geom_smooth(method = 'lm', data = mortality_TX_neighbor[mortality_TX_neighbor['State']!='TX'],fill=None,linetype='dashed') +
+        # change labels
+        labs(title = "Diff-in-Diff, Drug Deaths Per Cap Trends 2004-2015",
+             x = "Time",
+             y = "Drug Deaths Per Cap",
+             color = 'Policy_State') +
+        # add vertical lines
+        geom_vline(aes(xintercept=2006)) +
+        geom_vline(aes(xintercept=2007)) +
+        # modify legends
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Texas)","False (4 Neigbors: NM, OK, AR, LA)"]) +
+        theme(legend_position=(.5, -.05)) +
+        # modify breaks of x axis
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+)
+
+"""
+Texas
+4 Neighbors as Control: NM, OK, AR, LA
+D-in-D Regression
+"""
+# Adjust for year
+mortality_TX_neighbor['Year_Adjust'] = mortality_TX_neighbor['Year'] - 2007
+# Regression
+result1_TX = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_TX_neighbor).fit()
+result1_TX.summary()
+
+"""
+Texas
+All other states as Control
+D-in-D Plotting
+"""
+# Subset data (drop Alaska)
+mortality_TX_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
+# Add dummy variables for post and policy_state
+mortality_TX_all['Post'] = (mortality_TX_all['Year']>=2007)
+mortality_TX_all['Policy_State'] = (mortality_TX_all['State']=='TX')
+# Plotting
+(ggplot(mortality_TX_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+        # add pre and post trend line for FL
+        geom_smooth(method = 'lm', data = mortality_TX_all[mortality_TX_all['State']=='TX'],fill=None) +
+        # add pre and post trend line for neighbor
+        geom_smooth(method = 'lm', data = mortality_TX_all[mortality_TX_all['State']!='TX'],fill=None,linetype='dashed') +
+        # change labels
+        labs(title = "Diff-in-Diff, Drug Deaths Per Cap Trends 2004-2015",
+             x = "Time",
+             y = "Drug Deaths Per Cap",
+             color = 'Policy_State') +
+        # add vertical lines
+        geom_vline(aes(xintercept=2006)) +
+        geom_vline(aes(xintercept=2007)) +
+        # modify legends
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Texas)","False (All other US states)"]) +
+        theme(legend_position=(.5, -.05)) +
+        # modify breaks of x axis
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+)
+
+"""
+Texas
+All other states as Control
+D-in-D Regression
+"""
+# Adjust for year
+mortality_TX_all['Year_Adjust'] = mortality_TX_all['Year'] - 2007
+# Regression
+result2_TX = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_TX_all).fit()
+result2_TX.summary()
+
+
+
+"""
+D-in-D Analysis
+Washington
+"""
+# Plot pre-post for all states as an overview
+(ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
+        # add pre-trend line and make it red
+        geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] < 2012], color = 'red') +
+        # add post-trend line
+        geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] >= 2012], color = 'black') +
+        # change labels
+        labs(title = "Drug Deaths Per Cap, All States 2004-2015, Policy Change in 2012",
+             x = "Time",
+             y = "Drug Deaths Rate") +
+        facet_wrap('State')
+)
+
+"""
+Washington
+2 Neighbors as Control: OR, ID
+D-in-D Plotting
+"""
+# Subset data
+mortality_WA_neighbor = (mortality_pop_norm[
+    (mortality_pop_norm['State']=='WA')|
+    (mortality_pop_norm['State']=='OR')|
+    (mortality_pop_norm['State']=='ID')])
+# Add dummy variables for post and policy_state
+mortality_WA_neighbor['Post'] = (mortality_WA_neighbor['Year']>=2012)
+mortality_WA_neighbor['Policy_State'] = (mortality_WA_neighbor['State']=='WA')
+# Plotting
+(ggplot(mortality_WA_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+        # add pre and post trend line for FL
+        geom_smooth(method = 'lm', data = mortality_WA_neighbor[mortality_WA_neighbor['State']=='WA'],fill=None) +
+        # add pre and post trend line for neighbor
+        geom_smooth(method = 'lm', data = mortality_WA_neighbor[mortality_WA_neighbor['State']!='WA'],fill=None,linetype='dashed') +
+        # change labels
+        labs(title = "Diff-in-Diff, Drug Deaths Per Cap Trends 2004-2015",
+             x = "Time",
+             y = "Drug Deaths Per Cap",
+             color = 'Policy_State') +
+        # add vertical lines
+        geom_vline(aes(xintercept=2011)) +
+        geom_vline(aes(xintercept=2012)) +
+        # modify legends
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Washington)","False (2 Neigbors: OR, ID)"]) +
+        theme(legend_position=(.5, -.05)) +
+        # modify breaks of x axis
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+)
+
+
+"""
+Washington
+2 Neighbors as Control: OR, ID
+D-in-D Regression
+"""
+# Adjust for year
+mortality_WA_neighbor['Year_Adjust'] = mortality_WA_neighbor['Year'] - 2012
+# Regression
+result1_WA = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_WA_neighbor).fit()
+result1_WA.summary()
+
+"""
+Washington
+All other states as Control
+D-in-D Plotting
+"""
+# Subset data (drop Alaska)
+mortality_WA_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
+# Add dummy variables for post and policy_state
+mortality_WA_all['Post'] = (mortality_WA_all['Year']>=2012)
+mortality_WA_all['Policy_State'] = (mortality_WA_all['State']=='WA')
+# Plotting
+(ggplot(mortality_WA_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+        # add pre and post trend line for FL
+        geom_smooth(method = 'lm', data = mortality_WA_all[mortality_WA_all['State']=='WA'],fill=None) +
+        # add pre and post trend line for neighbor
+        geom_smooth(method = 'lm', data = mortality_WA_all[mortality_WA_all['State']!='WA'],fill=None,linetype='dashed') +
+        # change labels
+        labs(title = "Diff-in-Diff, Drug Deaths Per Cap Trends 2004-2015",
+             x = "Time",
+             y = "Drug Deaths Per Cap",
+             color = 'Policy_State') +
+        # add vertical lines
+        geom_vline(aes(xintercept=2011)) +
+        geom_vline(aes(xintercept=2012)) +
+        # modify legends
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Washington)","False (2 Neigbors: OR, ID)"]) +
+        theme(legend_position=(.5, -.05)) +
+        # modify breaks of x axis
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+)
+
+"""
+Washington
+All other states as Control
+D-in-D Regression
+"""
+# Adjust for year
+mortality_WA_all['Year_Adjust'] = mortality_WA_all['Year'] - 2012
+# Regression
+result2_WA = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_WA_all).fit()
+result2_WA.summary()
