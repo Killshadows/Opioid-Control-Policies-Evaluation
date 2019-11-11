@@ -110,6 +110,9 @@ Florida
 2 Neighbors as Control: AL, GA
 D-in-D Regression
 """
+# Change data type of dummy variables to integer for regression
+mortality_FL_neighbor['Post'] = mortality_FL_neighbor['Post'].astype('int')
+mortality_FL_neighbor['Policy_State'] = mortality_FL_neighbor['Policy_State'].astype('int')
 # Adjust for year
 mortality_FL_neighbor['Year_Adjust'] = mortality_FL_neighbor['Year'] - 2010
 # Regression
@@ -155,6 +158,9 @@ Florida
 All other states as Control
 D-in-D Regression
 """
+# Change data type of dummy variables to integer for regression
+mortality_FL_all['Post'] = mortality_FL_all['Post'].astype('int')
+mortality_FL_all['Policy_State'] = mortality_FL_all['Policy_State'].astype('int')
 # Adjust for year
 mortality_FL_all['Year_Adjust'] = mortality_FL_all['Year'] - 2010
 # Regression
@@ -223,6 +229,9 @@ Texas
 4 Neighbors as Control: NM, OK, AR, LA
 D-in-D Regression
 """
+# Change data type of dummy variables to integer for regression
+mortality_TX_neighbor['Post'] = mortality_TX_neighbor['Post'].astype('int')
+mortality_TX_neighbor['Policy_State'] = mortality_TX_neighbor['Policy_State'].astype('int')
 # Adjust for year
 mortality_TX_neighbor['Year_Adjust'] = mortality_TX_neighbor['Year'] - 2007
 # Regression
@@ -266,6 +275,9 @@ Texas
 All other states as Control
 D-in-D Regression
 """
+# Change data type of dummy variables to integer for regression
+mortality_TX_all['Post'] = mortality_TX_all['Post'].astype('int')
+mortality_TX_all['Policy_State'] = mortality_TX_all['Policy_State'].astype('int')
 # Adjust for year
 mortality_TX_all['Year_Adjust'] = mortality_TX_all['Year'] - 2007
 # Regression
@@ -332,6 +344,9 @@ Washington
 2 Neighbors as Control: OR, ID
 D-in-D Regression
 """
+# Change data type of dummy variables to integer for regression
+mortality_WA_neighbor['Post'] = mortality_WA_neighbor['Post'].astype('int')
+mortality_WA_neighbor['Policy_State'] = mortality_WA_neighbor['Policy_State'].astype('int')
 # Adjust for year
 mortality_WA_neighbor['Year_Adjust'] = mortality_WA_neighbor['Year'] - 2012
 # Regression
@@ -375,6 +390,9 @@ Washington
 All other states as Control
 D-in-D Regression
 """
+# Change data type of dummy variables to integer for regression
+mortality_WA_all['Post'] = mortality_WA_all['Post'].astype('int')
+mortality_WA_all['Policy_State'] = mortality_WA_all['Policy_State'].astype('int')
 # Adjust for year
 mortality_WA_all['Year_Adjust'] = mortality_WA_all['Year'] - 2012
 # Regression
