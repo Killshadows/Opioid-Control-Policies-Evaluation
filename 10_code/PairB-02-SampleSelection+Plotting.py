@@ -27,7 +27,7 @@ mortality_FL = mortality_pop_norm[mortality_pop_norm['State']=='FL']
         # add post-trend line
         geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] >= 2010], color = 'black') +
         # change labels
-        labs(title = "Time Trends of Drug Deaths Rate 2004-2015",
+        labs(title = "Time Trends of Drug Deaths Per Cap, Florida 2004-2015",
              x = "Time",
              y = "Drug Deaths Rate")
 )
@@ -56,17 +56,19 @@ D-in-D Analysis
 Florida
 """
 # Plot pre-post for all states as an overview
-(ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
+p_FL_overview = (ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
         # add pre-trend line and make it red
         geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] < 2010], color = 'red') +
         # add post-trend line
         geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] >= 2010], color = 'black') +
         # change labels
-        labs(title = "Drug Deaths Rate, All States 2004-2015, Policy Change in 2010",
+        labs(title = "Drug Deaths Per Cap, All States 2004-2015, Policy Change in 2010",
              x = "Time",
              y = "Drug Deaths Rate") +
         facet_wrap('State')
 )
+# Save the Plot
+p_FL_overview.save('/Users/killshadows/Desktop/project/FL_overview.png')
 
 """
 Florida
@@ -82,7 +84,7 @@ mortality_FL_neighbor = (mortality_pop_norm[
 mortality_FL_neighbor['Post'] = (mortality_FL_neighbor['Year']>=2010)
 mortality_FL_neighbor['Policy_State'] = (mortality_FL_neighbor['State']=='FL')
 # Plotting
-(ggplot(mortality_FL_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+p_FL_neighbor = (ggplot(mortality_FL_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
         # add pre and post trend line for FL
         geom_smooth(method = 'lm', data = mortality_FL_neighbor[mortality_FL_neighbor['State']=='FL'],fill=None) +
         # add pre and post trend line for neighbor
@@ -101,6 +103,7 @@ mortality_FL_neighbor['Policy_State'] = (mortality_FL_neighbor['State']=='FL')
         # modify breaks of x axis
         scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
 )
+p_FL_neighbor.save('/Users/killshadows/Desktop/project/FL_neighbor.png')
 
 """
 Florida
@@ -112,7 +115,7 @@ mortality_FL_neighbor['Year_Adjust'] = mortality_FL_neighbor['Year'] - 2010
 # Regression
 import statsmodels as sm
 import statsmodels.formula.api as smf
-result1_FL = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_smallsample).fit()
+result1_FL = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_neighbor).fit()
 result1_FL.summary()
 
 """
@@ -126,7 +129,7 @@ mortality_FL_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
 mortality_FL_all['Post'] = (mortality_FL_all['Year']>=2010)
 mortality_FL_all['Policy_State'] = (mortality_FL_all['State']=='FL')
 # Plotting
-(ggplot(mortality_FL_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+p_FL_all = (ggplot(mortality_FL_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
         # add pre and post trend line for FL
         geom_smooth(method = 'lm', data = mortality_FL_all[mortality_FL_all['State']=='FL'],fill=None) +
         # add pre and post trend line for neighbor
@@ -145,6 +148,7 @@ mortality_FL_all['Policy_State'] = (mortality_FL_all['State']=='FL')
         # modify breaks of x axis
         scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
 )
+p_FL_all.save('/Users/killshadows/Desktop/project/FL_all.png')
 
 """
 Florida
@@ -164,7 +168,7 @@ D-in-D Analysis
 Texas
 """
 # Plot pre-post for all states as an overview
-(ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
+p_TX_overview = (ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
         # add pre-trend line and make it red
         geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] < 2007], color = 'red') +
         # add post-trend line
@@ -175,6 +179,7 @@ Texas
              y = "Drug Deaths Rate") +
         facet_wrap('State')
 )
+p_TX_overview.save('/Users/killshadows/Desktop/project/TX_overview.png')
 
 """
 Texas
@@ -192,7 +197,7 @@ mortality_TX_neighbor = (mortality_pop_norm[
 mortality_TX_neighbor['Post'] = (mortality_TX_neighbor['Year']>=2007)
 mortality_TX_neighbor['Policy_State'] = (mortality_TX_neighbor['State']=='TX')
 # Plotting
-(ggplot(mortality_TX_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+p_TX_neighbor = (ggplot(mortality_TX_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
         # add pre and post trend line for FL
         geom_smooth(method = 'lm', data = mortality_TX_neighbor[mortality_TX_neighbor['State']=='TX'],fill=None) +
         # add pre and post trend line for neighbor
@@ -211,6 +216,7 @@ mortality_TX_neighbor['Policy_State'] = (mortality_TX_neighbor['State']=='TX')
         # modify breaks of x axis
         scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
 )
+p_TX_neighbor.save('/Users/killshadows/Desktop/project/TX_neighbor.png')
 
 """
 Texas
@@ -234,7 +240,7 @@ mortality_TX_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
 mortality_TX_all['Post'] = (mortality_TX_all['Year']>=2007)
 mortality_TX_all['Policy_State'] = (mortality_TX_all['State']=='TX')
 # Plotting
-(ggplot(mortality_TX_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+p_TX_all = (ggplot(mortality_TX_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
         # add pre and post trend line for FL
         geom_smooth(method = 'lm', data = mortality_TX_all[mortality_TX_all['State']=='TX'],fill=None) +
         # add pre and post trend line for neighbor
@@ -253,6 +259,7 @@ mortality_TX_all['Policy_State'] = (mortality_TX_all['State']=='TX')
         # modify breaks of x axis
         scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
 )
+p_TX_all.save('/Users/killshadows/Desktop/project/TX_all.png')
 
 """
 Texas
@@ -272,7 +279,7 @@ D-in-D Analysis
 Washington
 """
 # Plot pre-post for all states as an overview
-(ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
+p_WA_overview = (ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_County')) +
         # add pre-trend line and make it red
         geom_smooth(method = 'lm', data = mortality_pop_norm[mortality_pop_norm['Year'] < 2012], color = 'red') +
         # add post-trend line
@@ -283,6 +290,7 @@ Washington
              y = "Drug Deaths Rate") +
         facet_wrap('State')
 )
+p_WA_overview.save('/Users/killshadows/Desktop/project/WA_overview.png')
 
 """
 Washington
@@ -298,7 +306,7 @@ mortality_WA_neighbor = (mortality_pop_norm[
 mortality_WA_neighbor['Post'] = (mortality_WA_neighbor['Year']>=2012)
 mortality_WA_neighbor['Policy_State'] = (mortality_WA_neighbor['State']=='WA')
 # Plotting
-(ggplot(mortality_WA_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+p_WA_neighbor = (ggplot(mortality_WA_neighbor, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
         # add pre and post trend line for FL
         geom_smooth(method = 'lm', data = mortality_WA_neighbor[mortality_WA_neighbor['State']=='WA'],fill=None) +
         # add pre and post trend line for neighbor
@@ -317,7 +325,7 @@ mortality_WA_neighbor['Policy_State'] = (mortality_WA_neighbor['State']=='WA')
         # modify breaks of x axis
         scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
 )
-
+p_WA_neighbor.save('/Users/killshadows/Desktop/project/WA_neighbor.png')
 
 """
 Washington
@@ -341,7 +349,7 @@ mortality_WA_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
 mortality_WA_all['Post'] = (mortality_WA_all['Year']>=2012)
 mortality_WA_all['Policy_State'] = (mortality_WA_all['State']=='WA')
 # Plotting
-(ggplot(mortality_WA_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
+p_WA_all = (ggplot(mortality_WA_all, aes(x='Year', y='Deaths_PerCap_County', group='Post', color = 'Policy_State')) +
         # add pre and post trend line for FL
         geom_smooth(method = 'lm', data = mortality_WA_all[mortality_WA_all['State']=='WA'],fill=None) +
         # add pre and post trend line for neighbor
@@ -360,6 +368,7 @@ mortality_WA_all['Policy_State'] = (mortality_WA_all['State']=='WA')
         # modify breaks of x axis
         scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
 )
+p_WA_all.save('/Users/killshadows/Desktop/project/WA_all.png')
 
 """
 Washington
