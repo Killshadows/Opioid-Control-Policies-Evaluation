@@ -143,6 +143,15 @@ plotSummary = (ggplot(shipment_FL_grouped, aes(x = 'YEAR', y = 'QUANTITY', color
                  color = "County")
 )
 plotSummary.save(f'/Users/ZifanPeng/Desktop/estimating-impact-of-opioid-prescription-regulations-team-2/30_results/FL_summary.png')
+# Group by year
+shipment_FL_year = shipment_FL_grouped.groupby(['BUYER_STATE','YEAR']).agg({'QUANTITY':sum,'POP':sum}).reset_index()
+FL_total_quantity = (ggplot(shipment_FL_year, aes(x = 'YEAR', y = 'QUANTITY'))
+                     +geom_line()
+                     +labs(title = "Toal Quantity of Opioid Shipments Trend in Florida",
+                           x = "Year",
+                           y = "Total Quantity")
+)
+FL_total_quantity.save(f'/Users/ZifanPeng/Desktop/estimating-impact-of-opioid-prescription-regulations-team-2/30_results/FL_total_quantity.png')
 
 
 
