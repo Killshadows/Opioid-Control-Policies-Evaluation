@@ -134,6 +134,17 @@ normalize(shipment_FL_grouped)
 # Plot
 plot(shipment_FL_grouped, 'FL')
 
+# Summary plot for FL
+plotSummary = (ggplot(shipment_FL_grouped, aes(x = 'YEAR', y = 'QUANTITY', color ='BUYER_COUNTY'))
+ +geom_line()
+  +labs(title = "Opioid Shipments Quantity Trend in Florida",
+                 x = "Year",
+                 y = "Quantity",
+                 color = "County")
+)
+plotSummary.save(f'/Users/ZifanPeng/Desktop/estimating-impact-of-opioid-prescription-regulations-team-2/30_results/FL_summary.png')
+
+
 
 
 
