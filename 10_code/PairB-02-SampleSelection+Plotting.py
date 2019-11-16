@@ -38,17 +38,36 @@ Pre-Post analysis - TX
 
 Plotting Pre-Post Graphs
 """
-
-
+mortality_FL = mortality_pop_norm[mortality_pop_norm['State']=='TX']
+print((ggplot(mortality_FL, aes(x='Year', y='Deaths_PerCap_County')) +
+        geom_point(alpha = 0.5) +
+        # add pre-trend line and make it red
+        geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] < 2007], color = 'red') +
+        # add post-trend line
+        geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] >= 2007], color = 'black') +
+        # change labels
+        labs(title = "Time Trends of Drug Deaths Per Cap, Texas 2004-2015",
+             x = "Time",
+             y = "Drug Deaths Rate")
+))
 
 """
 Pre-Post analysis - DC
 
 Plotting Pre-Post Graphs
 """
-
-
-
+mortality_FL = mortality_pop_norm[mortality_pop_norm['State']=='WA']
+print((ggplot(mortality_FL, aes(x='Year', y='Deaths_PerCap_County')) +
+        geom_point(alpha = 0.5) +
+        # add pre-trend line and make it red
+        geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] < 2012], color = 'red') +
+        # add post-trend line
+        geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] >= 2012], color = 'black') +
+        # change labels
+        labs(title = "Time Trends of Drug Deaths Per Cap, DC Washington 2004-2015",
+             x = "Time",
+             y = "Drug Deaths Rate")
+))
 
 
 """
