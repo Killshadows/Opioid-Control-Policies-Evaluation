@@ -35,17 +35,11 @@ def readData(path):
 Transfer TRANSACTION_DATE to year & month
 '''
 def transferDate(df_shipments):
-# Convert RTANSACTION_DATE to string in order to subset it
-    df_shipments['TRANSACTION_DATE'] = df_shipments['TRANSACTION_DATE'].astype(str)
-# Subset the TRANSACTION_DATE, and get YEAR and Month
-    df_shipments['YEAR'] = df_shipments['TRANSACTION_DATE'].apply(lambda x: x[-4:])
-    df_shipments['MONTH'] = df_shipments['TRANSACTION_DATE'].apply(lambda x: x[-8:-6])
-# Convert to int, in order to use PeriodIndex
-# Create a new col as YYYY-MM
-    df_shipments['YEAR'] = df_shipments['YEAR'].astype(int)
-    df_shipments['MONTH'] = df_shipments['MONTH'].astype(int)
-    df_shipments['TRANSACTION_TIME'] = pd.PeriodIndex(year=df_shipments["YEAR"], month=df_shipments["MONTH"], freq="m")
+    df_shipments['TRANSACTION_TIME'] = pd.to_datetime(df_shipments.TRANSACTION_DATE, format="%m%d%Y")
+    df_shipments['YEAR'] = df_shipments.TRANSACTION_TIME.dt.year
+    df_shipments['MONTH'] = df_shipments.TRANSACTION_TIME.dt.month
     return df_shipments
+
 
 '''
 group by 'BUYER_STATE','BUYER_COUNTY', 'YEAR'
