@@ -28,7 +28,7 @@ Read data
 def readData(path):
     df = pd.read_csv(path,
                      sep='\t',
-                     usecols=['TRANSACTION_DATE', 'BUYER_STATE', 'BUYER_COUNTY', 'QUANTITY', 'BUYER_ZIP'])
+                     usecols=['TRANSACTION_DATE', 'BUYER_STATE', 'BUYER_COUNTY', 'BUYER_ZIP', 'CALC_BASE_WT_IN_GM', 'MME_Conversion_Factor'])
     return df
 
 '''
@@ -39,7 +39,6 @@ def transferDate(df_shipments):
     df_shipments['YEAR'] = df_shipments.TRANSACTION_TIME.dt.year
     df_shipments['MONTH'] = df_shipments.TRANSACTION_TIME.dt.month
     return df_shipments
-
 
 '''
 group by 'BUYER_STATE','BUYER_COUNTY', 'YEAR'
@@ -105,11 +104,17 @@ assert (shipments_FL.isnull().any().sum())==0
 # Transfer time
 shipments_FL = transferDate(shipments_FL)
 
-# Subset population for FL
+# Add a column : morphine equivalent quantity
+shipments_FL['QUANTITY'] = shipments_FL['CALC_BASE_WT_IN_GM'] * shipments_FL['MME_Conversion_Factor']
+
+# Drop uncorrelated cols
+shipments_FL = shipments_FL.drop( ['BUYER_ZIP', 'TRANSACTION_DATE','CALC_BASE_WT_IN_GM','MME_Conversion_Factor'], axis = 1)
+
+# Subset population for FL & fix typo
 pop_FL = pop[pop.State == 'Florida'].reset_index().drop('index', axis = 1)
 pop_FL['County'] = pop_FL['County'].replace({'ST. LUCIE': 'SAINT LUCIE',
-                                                          'ST. JOHNS': 'SAINT JOHNS',
-                                                          'DESOTO': 'DE SOTO'})
+                                             'ST. JOHNS': 'SAINT JOHNS',
+                                             'DESOTO': 'DE SOTO'})
 
 # Merge
 shipment_FL_merged = pd.merge(shipments_FL, pop_FL, left_on='BUYER_COUNTY', right_on='County',
@@ -160,6 +165,11 @@ assert (shipments_AL.isnull().any().sum())==0
 # Transfer time
 shipments_AL = transferDate(shipments_AL)
 
+# Add a column : morphine equivalent quantity
+shipments_AL['QUANTITY'] = shipments_AL['CALC_BASE_WT_IN_GM'] * shipments_AL['MME_Conversion_Factor']
+# Drop uncorrelated cols
+shipments_AL = shipments_AL.drop( ['BUYER_ZIP', 'TRANSACTION_DATE','CALC_BASE_WT_IN_GM','MME_Conversion_Factor'], axis = 1)
+
 # Merge shipment data with pop data for AL
 # Subset population for AL
 pop_AL = pop[pop.State == 'Alabama'].reset_index().drop('index', axis = 1)
@@ -202,6 +212,12 @@ assert (shipments_GA.isnull().any().sum())==0
 # Transfer time
 shipments_GA = transferDate(shipments_GA)
 
+# Add a column : morphine equivalent quantity
+shipments_GA['QUANTITY'] = shipments_GA['CALC_BASE_WT_IN_GM'] * shipments_GA['MME_Conversion_Factor']
+
+# Drop uncorrelated cols
+shipments_GA = shipments_GA.drop( ['BUYER_ZIP', 'TRANSACTION_DATE','CALC_BASE_WT_IN_GM','MME_Conversion_Factor'], axis = 1)
+
 # Merge shipment data with pop data for GA
 # Subset population for GA
 pop_GA = pop[pop.State == 'Georgia'].reset_index().drop('index', axis = 1)
@@ -236,7 +252,7 @@ prePost = (ggplot(aes(x = 'YEAR', y = 'QUANTITY_PERCAP', group = 'POST', color =
            # Georgia
            +geom_smooth(method = 'lm', fill = None, data = shipment_GA_grouped)
            # Change themes
-           +theme_classic(base_family = "Helvetica")
+           #+theme_classic(base_family = "Helvetica")
            # change labels
            +labs(title = "Opioid Shipments Rate, Policy Change in 2010 in FL",
                  x = "Year",
@@ -254,7 +270,7 @@ prePost2 = (ggplot(aes(x = 'YEAR', y = 'QUANTITY_PERCAP', group = 'POST', color 
            # AL & GA
            +geom_smooth(method = 'lm', fill = None,data = shipment_AL_GA)
            # Change themes
-           +theme_classic(base_family = "Helvetica")
+           #+theme_classic(base_family = "Helvetica")
            # change labels
            +labs(title = "Opioid Shipments Rate, Policy Change in 2010 in FL",
                  x = "Year",
