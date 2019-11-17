@@ -1,26 +1,28 @@
 ######### README ########
 
-# Plots pre-post graphs for treat states and also all other states
-# Runs regressions for pre-trend-line and get estimates
-# Compare estimates to select ideal control states
+# Plots pre-post graphs for treat states
+# Runs regressions for pre-trend-line, get estimates and then compare to select ideal control
+# Plots D-in-D graphs based on three types of control/
+# Similar pre-trend, 5 neighbors and national (all other states)
+# Runs D-in-D regressions
 
-# Start with FL on Nov.8
-# Need review before moving forwards
-
-"""
-Pre-Post analysis - FL
-
-Plotting Pre-Post Graphs
-"""
 
 from plotnine import *
 
 # Change datatype of deaths rate to float
 mortality_pop_norm['Deaths_PerCap_County'] = mortality_pop_norm['Deaths_PerCap_County'].astype('float')
 
+
+
+"""
+Pre-Post analysis - FL
+
+Plotting Pre-Post Graphs
+"""
 # Plot pre-post graphs for FL
 mortality_FL = mortality_pop_norm[mortality_pop_norm['State']=='FL']
-(ggplot(mortality_FL, aes(x='Year', y='Deaths_PerCap_County')) +
+(ggplot(mortality_FL, aes(
+x='Year', y='Deaths_PerCap_County')) +
         geom_point(alpha = 0.5) +
         # add pre-trend line and make it red
         geom_smooth(method = 'lm', data = mortality_FL[mortality_FL['Year'] < 2010], color = 'red') +
@@ -51,6 +53,7 @@ print((ggplot(mortality_FL, aes(x='Year', y='Deaths_PerCap_County')) +
              y = "Drug Deaths Rate")
 ))
 
+
 """
 Pre-Post analysis - DC
 
@@ -68,6 +71,7 @@ print((ggplot(mortality_FL, aes(x='Year', y='Deaths_PerCap_County')) +
              x = "Time",
              y = "Drug Deaths Rate")
 ))
+
 
 
 """
@@ -89,16 +93,36 @@ p_FL_overview = (ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_Count
 # Save the Plot
 p_FL_overview.save('/Users/killshadows/Desktop/project/FL_overview.png')
 
+
 """
-Florida
-2 Neighbors as Control: AL, GA
 D-in-D Plotting
+Florida
+5 with Similar Pre-trends as Control: 
+"""
+
+
+"""
+D-in-D Regression
+Florida
+5 with Similar Pre-trends as Control: 
+"""
+
+
+
+
+"""
+D-in-D Plotting
+Florida
+5 Neighbors as Control: LA, MS, AL, GA, SC
 """
 # Subset data
 mortality_FL_neighbor = (mortality_pop_norm[
     (mortality_pop_norm['State']=='FL')|
+    (mortality_pop_norm['State']=='LA')|
+    (mortality_pop_norm['State']=='MS')|
     (mortality_pop_norm['State']=='AL')|
-    (mortality_pop_norm['State']=='GA')])
+    (mortality_pop_norm['State']=='GA')|
+    (mortality_pop_norm['State']=='SC')])
 # Add dummy variables for post and policy_state
 mortality_FL_neighbor['Post'] = (mortality_FL_neighbor['Year']>=2010)
 mortality_FL_neighbor['Policy_State'] = (mortality_FL_neighbor['State']=='FL')
@@ -117,17 +141,19 @@ p_FL_neighbor = (ggplot(mortality_FL_neighbor, aes(x='Year', y='Deaths_PerCap_Co
         geom_vline(aes(xintercept=2009)) +
         geom_vline(aes(xintercept=2010)) +
         # modify legends
-        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Florida)","False (2 Neigbors: AL, GA)"]) +
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Florida)","False (5 Neigbors: LA, MS, AL, GA, SC)"]) +
         theme(legend_position=(.5, -.05)) +
         # modify breaks of x axis
-        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[]) +
+        coord_cartesian(ylim = [0.00005,0.0002])
 )
 p_FL_neighbor.save('/Users/killshadows/Desktop/project/FL_neighbor.png')
 
+
 """
-Florida
-2 Neighbors as Control: AL, GA
 D-in-D Regression
+Florida
+5 Neighbors as Control: LA, MS, AL, GA, SC
 """
 # Change data type of dummy variables to integer for regression
 mortality_FL_neighbor['Post'] = mortality_FL_neighbor['Post'].astype('int')
@@ -140,10 +166,11 @@ import statsmodels.formula.api as smf
 result1_FL = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_neighbor).fit()
 result1_FL.summary()
 
+
 """
+D-in-D Plotting
 Florida
 All other states as Control
-D-in-D Plotting
 """
 # Subset data (drop Alaska)
 mortality_FL_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
@@ -168,14 +195,16 @@ p_FL_all = (ggplot(mortality_FL_all, aes(x='Year', y='Deaths_PerCap_County', gro
         scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Florida)","False (All other US states)"]) +
         theme(legend_position=(.5, -.05)) +
         # modify breaks of x axis
-        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[]) +
+        coord_cartesian(ylim = [0.00005,0.0002])
 )
 p_FL_all.save('/Users/killshadows/Desktop/project/FL_all.png')
 
+
 """
+D-in-D Regression
 Florida
 All other states as Control
-D-in-D Regression
 """
 # Change data type of dummy variables to integer for regression
 mortality_FL_all['Post'] = mortality_FL_all['Post'].astype('int')
@@ -206,10 +235,28 @@ p_TX_overview = (ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_Count
 )
 p_TX_overview.save('/Users/killshadows/Desktop/project/TX_overview.png')
 
+
 """
-Texas
-4 Neighbors as Control: NM, OK, AR, LA
 D-in-D Plotting
+Texas
+5 with Similar Pre-trends as Control: 
+"""
+
+
+"""
+D-in-D Regression
+Texas
+5 with Similar Pre-trends as Control: 
+"""
+
+
+
+
+
+"""
+D-in-D Plotting
+Texas
+5 Neighbors as Control: NM, OK, AR, LA, KS
 """
 # Subset data
 mortality_TX_neighbor = (mortality_pop_norm[
@@ -217,7 +264,8 @@ mortality_TX_neighbor = (mortality_pop_norm[
     (mortality_pop_norm['State']=='NM')|
     (mortality_pop_norm['State']=='OK')|
     (mortality_pop_norm['State']=='AR')|
-    (mortality_pop_norm['State']=='LA')])
+    (mortality_pop_norm['State']=='LA')|
+    (mortality_pop_norm['State']=='KS')])
 # Add dummy variables for post and policy_state
 mortality_TX_neighbor['Post'] = (mortality_TX_neighbor['Year']>=2007)
 mortality_TX_neighbor['Policy_State'] = (mortality_TX_neighbor['State']=='TX')
@@ -236,17 +284,19 @@ p_TX_neighbor = (ggplot(mortality_TX_neighbor, aes(x='Year', y='Deaths_PerCap_Co
         geom_vline(aes(xintercept=2006)) +
         geom_vline(aes(xintercept=2007)) +
         # modify legends
-        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Texas)","False (4 Neigbors: NM, OK, AR, LA)"]) +
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Texas)","False (5 Neigbors: NM, OK, AR, LA, KS)"]) +
         theme(legend_position=(.5, -.05)) +
         # modify breaks of x axis
-        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[]) +
+        coord_cartesian(ylim = [0.00005,0.000225])
 )
 p_TX_neighbor.save('/Users/killshadows/Desktop/project/TX_neighbor.png')
 
+
 """
-Texas
-4 Neighbors as Control: NM, OK, AR, LA
 D-in-D Regression
+Texas
+5 Neighbors as Control: NM, OK, AR, LA, KS
 """
 # Change data type of dummy variables to integer for regression
 mortality_TX_neighbor['Post'] = mortality_TX_neighbor['Post'].astype('int')
@@ -257,10 +307,11 @@ mortality_TX_neighbor['Year_Adjust'] = mortality_TX_neighbor['Year'] - 2007
 result1_TX = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_TX_neighbor).fit()
 result1_TX.summary()
 
+
 """
+D-in-D Plotting
 Texas
 All other states as Control
-D-in-D Plotting
 """
 # Subset data (drop Alaska)
 mortality_TX_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
@@ -285,14 +336,16 @@ p_TX_all = (ggplot(mortality_TX_all, aes(x='Year', y='Deaths_PerCap_County', gro
         scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Texas)","False (All other US states)"]) +
         theme(legend_position=(.5, -.05)) +
         # modify breaks of x axis
-        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[]) +
+        coord_cartesian(ylim = [0.00005,0.000225])
 )
 p_TX_all.save('/Users/killshadows/Desktop/project/TX_all.png')
 
+
 """
+D-in-D Regression
 Texas
 All other states as Control
-D-in-D Regression
 """
 # Change data type of dummy variables to integer for regression
 mortality_TX_all['Post'] = mortality_TX_all['Post'].astype('int')
@@ -302,6 +355,7 @@ mortality_TX_all['Year_Adjust'] = mortality_TX_all['Year'] - 2007
 # Regression
 result2_TX = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_TX_all).fit()
 result2_TX.summary()
+
 
 
 
@@ -323,16 +377,38 @@ p_WA_overview = (ggplot(mortality_pop_norm, aes(x='Year', y='Deaths_PerCap_Count
 )
 p_WA_overview.save('/Users/killshadows/Desktop/project/WA_overview.png')
 
+
 """
-Washington
-2 Neighbors as Control: OR, ID
 D-in-D Plotting
+Washington
+5 with Similar Pre-trends as Control: 
+"""
+
+
+"""
+D-in-D Regression
+Washington
+5 with Similar Pre-trends as Control: 
+"""
+
+
+
+
+
+
+"""
+D-in-D Plotting
+Washington
+5 Neighbors as Control: OR, ID, MT, NV, WY
 """
 # Subset data
 mortality_WA_neighbor = (mortality_pop_norm[
     (mortality_pop_norm['State']=='WA')|
     (mortality_pop_norm['State']=='OR')|
-    (mortality_pop_norm['State']=='ID')])
+    (mortality_pop_norm['State']=='ID')|
+    (mortality_pop_norm['State']=='MT')|
+    (mortality_pop_norm['State']=='NV')|
+    (mortality_pop_norm['State']=='WY')])
 # Add dummy variables for post and policy_state
 mortality_WA_neighbor['Post'] = (mortality_WA_neighbor['Year']>=2012)
 mortality_WA_neighbor['Policy_State'] = (mortality_WA_neighbor['State']=='WA')
@@ -351,17 +427,19 @@ p_WA_neighbor = (ggplot(mortality_WA_neighbor, aes(x='Year', y='Deaths_PerCap_Co
         geom_vline(aes(xintercept=2011)) +
         geom_vline(aes(xintercept=2012)) +
         # modify legends
-        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Washington)","False (2 Neigbors: OR, ID)"]) +
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Washington)","False (5 Neigbors: OR, ID, MT, NV, WY)"]) +
         theme(legend_position=(.5, -.05)) +
         # modify breaks of x axis
-        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[]) +
+        coord_cartesian(ylim = [0.00005,0.000225])
 )
 p_WA_neighbor.save('/Users/killshadows/Desktop/project/WA_neighbor.png')
 
+
 """
-Washington
-2 Neighbors as Control: OR, ID
 D-in-D Regression
+Washington
+5 Neighbors as Control: OR, ID, MT, NV, WY
 """
 # Change data type of dummy variables to integer for regression
 mortality_WA_neighbor['Post'] = mortality_WA_neighbor['Post'].astype('int')
@@ -372,10 +450,11 @@ mortality_WA_neighbor['Year_Adjust'] = mortality_WA_neighbor['Year'] - 2012
 result1_WA = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_WA_neighbor).fit()
 result1_WA.summary()
 
+
 """
+D-in-D Plotting
 Washington
 All other states as Control
-D-in-D Plotting
 """
 # Subset data (drop Alaska)
 mortality_WA_all = mortality_pop_norm[mortality_pop_norm['State']!='AK']
@@ -397,17 +476,19 @@ p_WA_all = (ggplot(mortality_WA_all, aes(x='Year', y='Deaths_PerCap_County', gro
         geom_vline(aes(xintercept=2011)) +
         geom_vline(aes(xintercept=2012)) +
         # modify legends
-        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Washington)","False (2 Neigbors: OR, ID)"]) +
+        scale_colour_manual(name="Counties in State with Policy Change", values=["red", "grey"], labels = ["True (Washington)","False (All other US states)"]) +
         theme(legend_position=(.5, -.05)) +
         # modify breaks of x axis
-        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[])
+        scale_x_continuous(breaks=range(2004, 2016), minor_breaks=[]) +
+        coord_cartesian(ylim = [0.00005,0.000225])
 )
 p_WA_all.save('/Users/killshadows/Desktop/project/WA_all.png')
 
+
 """
+D-in-D Regression
 Washington
 All other states as Control
-D-in-D Regression
 """
 # Change data type of dummy variables to integer for regression
 mortality_WA_all['Post'] = mortality_WA_all['Post'].astype('int')
