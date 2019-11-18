@@ -163,8 +163,9 @@ mortality_FL_neighbor['Year_Adjust'] = mortality_FL_neighbor['Year'] - 2010
 # Regression
 import statsmodels as sm
 import statsmodels.formula.api as smf
-result1_FL = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_neighbor).fit()
+result1_FL = smf.ols("Deaths_PerCap_County ~ Policy_State + Year_Adjust + Year_Adjust:Policy_State + Post + Post:Policy_State + Post:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_neighbor).fit()
 result1_FL.summary()
+
 
 
 """
@@ -212,7 +213,7 @@ mortality_FL_all['Policy_State'] = mortality_FL_all['Policy_State'].astype('int'
 # Adjust for year
 mortality_FL_all['Year_Adjust'] = mortality_FL_all['Year'] - 2010
 # Regression
-result2_FL = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_all).fit()
+result2_FL = smf.ols("Deaths_PerCap_County ~ Policy_State + Year_Adjust + Year_Adjust:Policy_State + Post + Post:Policy_State + Post:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_FL_all).fit()
 result2_FL.summary()
 
 
@@ -304,7 +305,7 @@ mortality_TX_neighbor['Policy_State'] = mortality_TX_neighbor['Policy_State'].as
 # Adjust for year
 mortality_TX_neighbor['Year_Adjust'] = mortality_TX_neighbor['Year'] - 2007
 # Regression
-result1_TX = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_TX_neighbor).fit()
+result1_TX = smf.ols("Deaths_PerCap_County ~ Policy_State + Year_Adjust + Year_Adjust:Policy_State + Post + Post:Policy_State + Post:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_TX_neighbor).fit()
 result1_TX.summary()
 
 
@@ -353,7 +354,7 @@ mortality_TX_all['Policy_State'] = mortality_TX_all['Policy_State'].astype('int'
 # Adjust for year
 mortality_TX_all['Year_Adjust'] = mortality_TX_all['Year'] - 2007
 # Regression
-result2_TX = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_TX_all).fit()
+result2_TX = smf.ols("Deaths_PerCap_County ~ Policy_State + Year_Adjust + Year_Adjust:Policy_State + Post + Post:Policy_State + Post:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_TX_all).fit()
 result2_TX.summary()
 
 
@@ -447,7 +448,7 @@ mortality_WA_neighbor['Policy_State'] = mortality_WA_neighbor['Policy_State'].as
 # Adjust for year
 mortality_WA_neighbor['Year_Adjust'] = mortality_WA_neighbor['Year'] - 2012
 # Regression
-result1_WA = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_WA_neighbor).fit()
+result1_WA = smf.ols("Deaths_PerCap_County ~ Policy_State + Year_Adjust + Year_Adjust:Policy_State + Post + Post:Policy_State + Post:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_WA_neighbor).fit()
 result1_WA.summary()
 
 
@@ -496,5 +497,5 @@ mortality_WA_all['Policy_State'] = mortality_WA_all['Policy_State'].astype('int'
 # Adjust for year
 mortality_WA_all['Year_Adjust'] = mortality_WA_all['Year'] - 2012
 # Regression
-result2_WA = smf.ols("Deaths_PerCap_County ~ Year_Adjust + Post + Post:Year_Adjust + Post:Policy_State + Policy_State:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_WA_all).fit()
+result2_WA = smf.ols("Deaths_PerCap_County ~ Policy_State + Year_Adjust + Year_Adjust:Policy_State + Post + Post:Policy_State + Post:Year_Adjust + Post:Year_Adjust:Policy_State", data = mortality_WA_all).fit()
 result2_WA.summary()
