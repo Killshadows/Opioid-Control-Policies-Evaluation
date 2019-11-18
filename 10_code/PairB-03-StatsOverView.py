@@ -315,12 +315,12 @@ fig = go.Figure(data=go.Choropleth(
     z = mortality_state['Deaths_PerTenThousand_State'], # Data to be color-coded
     locationmode = 'USA-states', # set of locations match entries in `locations`
     colorscale = 'Blues',
-    colorbar_title = "Drug Deaths Per Cap",
+    colorbar_title = "Drug Deaths Per Ten Thousand People",
     marker_line_color='white',
     marker_line_width=0.5
 ))
 fig.update_layout(
-    title_text = 'US Drug Deaths Per Ten Thousand People by State, 2004-2015)',
+    title_text = 'US Drug Deaths Per Ten Thousand People by State, 2004-2015',
     geo_scope='usa', # limit map scope to USA
 )
 fig.show()
