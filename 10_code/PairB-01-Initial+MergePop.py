@@ -129,11 +129,18 @@ merge_mortality.head()
 # Check unmatched information in merging
 merge_mortality['_merge'].value_counts()
 
-# Check if there is missed information in DC, FL and TX
+# Check if there is missed information
+# Seems no missing information in WA, FL and TX
+# But do have missing in some other states
 miss = merge_mortality[merge_mortality['_merge'] != 'both']
-miss[(miss['State_Code'] == 'DC')|(miss['State_Code'] == 'FL')|(miss['State_Code'] == 'TX')]
+miss
+miss['_merge'].value_counts()
+miss[(miss['State_Code'] == 'WA')|(miss['State_Code'] == 'FL')|(miss['State_Code'] == 'TX')]
 
-# Check if there is different naming for a state
+# Check which state has missing information
+miss['State_Name'].value_counts()
+
+# Check if there is different naming for DC
 import re
 for i in state_dic['State_Name'].unique():
     if re.match(".*D.*",i):
@@ -145,25 +152,87 @@ state_dic[(state_dic['State_Name']=='District of Columbia')|(state_dic['State_Na
 # Unify the naming for District of Columbia
 state_dic['State_Name'][state_dic['State_Name'] == 'D.C.'] = 'District of Columbia'
 
-# Redo merge
+# Check if there is different naming for Rhode Island and Providence Plantations
+for i in state_dic['State_Name'].unique():
+    if re.match(".*hode.*",i):
+        print(i)      
+        
+# Go back to original dictionary data to verify
+state_dic[(state_dic['State_Name']=='Rhode Island')|(state_dic['State_Name']=='Rhode Island and Providence Plantations')]
+
+# Unify the naming for Rhode Island and Providence Plantations
+state_dic['State_Name'][state_dic['State_Name'] == 'Rhode Island and Providence Plantations'] = 'Rhode Island'
+
+# Check if there is different naming for New Mexico, Indiana and Pennsylvania
+# seems they are not from the problem of different naming
+for i in state_dic['State_Name'].unique():
+    if re.match(".*exi.*",i):
+        print(i)
+for i in state_dic['State_Name'].unique():
+    if re.match(".*ndia.*",i):
+        print(i)
+for i in state_dic['State_Name'].unique():
+    if re.match(".*enns.*",i):
+        print(i)        
+
+
+# Redo merge first
 merge_dic = pd.merge(mortality, state_dic, how='left', on='State_Code')
 merge_dic = merge_dic[['Year', 'State_Code', 'State_Name', 'County', 'Deaths']]
 merge_mortality = pd.merge(merge_dic, pop, how='left', on=['State_Name','County'], indicator=True)
 
-# Check unmatched information
+# Check still missing information
 merge_mortality['_merge'].value_counts()
-
-# There are still some unmatched
-# Deal with them later if needed when come to sample selection
 miss = merge_mortality[merge_mortality['_merge'] != 'both']
-miss['State_Name'].value_counts()
+miss
 
-# Drop state AK
-merge_mortality = merge_mortality[merge_mortality['State_Code']!='AK'].reset_index(drop=True)
+# Check if there is something wrong with Mc Kean County in pop data
+for i in pop['County'].unique():
+    if re.match(".*ean.*",i):
+        print(i)
+for i in mortality['County'].unique():
+    if re.match(".*ean.*",i):
+        print(i)
+# Unify the naming for Mc Kean County
+pop['County'][pop['County']=='McKean County'] = 'Mc Kean County'
 
-# Check if there is NaN in population for DC, FL and TX
+# Check if there is something wrong with Dona Ana County in pop data
+for i in pop['County'].unique():
+    if re.match(".*Ana.*",i):
+        print(i)
+for i in mortality['County'].unique():
+    if re.match(".*Ana.*",i):
+        print(i)
+# Unify the naming for Dona Ana County
+pop['County'][pop['County']=='Doña Ana County'] = 'Dona Ana County'
+
+# Check if there is something wrong with La Porte County in pop data
+for i in pop['County'].unique():
+    if re.match(".*orte.*",i):
+        print(i)
+for i in mortality['County'].unique():
+    if re.match(".*orte.*",i):
+        print(i)  
+# Unify the naming for La Porte County
+pop['County'][pop['County']=='LaPorte County'] = 'La Porte County'
+
+# Redo merge again
+merge_dic = pd.merge(mortality, state_dic, how='left', on='State_Code')
+merge_dic = merge_dic[['Year', 'State_Code', 'State_Name', 'County', 'Deaths']]
+merge_mortality = pd.merge(merge_dic, pop, how='left', on=['State_Name','County'], indicator=True)
+
+# Check still missing information
+# Ignore Alaska and will drop it later
+merge_mortality['_merge'].value_counts()
+miss = merge_mortality[merge_mortality['_merge'] != 'both']
+miss
+
+# Reset index of merged data
+merge_mortality = merge_mortality.reset_index(drop=True)
+
+# Check if there is NaN in population for WA, FL and TX
 # We got our merged dataset ready for the next step
-assert not merge_mortality[(merge_mortality['State_Code']=='DC')|(merge_mortality['State_Code']=='FL')|(merge_mortality['State_Code']=='TX')]['Population_2010'].isnull().any()
+assert not merge_mortality[(merge_mortality['State_Code']=='WA')|(merge_mortality['State_Code']=='FL')|(merge_mortality['State_Code']=='TX')]['Population_2010'].isnull().any()
 
 # Normalization by 2010 Population
 merge_mortality['Deaths_NormPop2010'] = merge_mortality['Deaths']/ merge_mortality['Population_2010']
