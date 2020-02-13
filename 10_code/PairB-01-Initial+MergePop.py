@@ -1,4 +1,5 @@
 ######## README ########
+# Author: Jingyi Wu
 
 # For easier bugs checking and fixing
 # This .py text file only makes the first step to initiate basic datasets for mortality analysis
