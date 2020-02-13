@@ -1,4 +1,5 @@
 ######### README ########
+# Author: Jingyi Wu
 # Plots pre-post graphs for treat states
 # Plots D-in-D graphs based on three types of control/
 # Neighbors, Similar states (pre-trend), and Nation-wide (all other US states)
